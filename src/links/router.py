@@ -1,13 +1,14 @@
 from fastapi import APIRouter
 
-from .schemas.requests_schemas import PostShortenLinkRequest, RedirectOnFullLinkRequest, DeleteShortLinkRequest, \
-    UpdateShortLinkRequest, GetShortLinkStatisticsRequest, GetShortLinkByOriginalUrlRequest
+from config import HOST_URL_OR_DOMEN, HOST_PORT
+from .utils import get_random_link_alias
+from .schemas.requests_schemas import PostShortenLinkRequestBody, ShortCode
 
 links_router = APIRouter(prefix='/links', tags=['links'])
 
 
 @links_router.post('/shorten')
-async def post_shorten_link():
+async def post_shorten_link(link_params: PostShortenLinkRequestBody):
     '''
         Создает кастомную короткую ссылку если передан параметр alias.
         Если ничего не передано, то генерирует alias автоматически и создает короткую ссылку.
@@ -15,11 +16,25 @@ async def post_shorten_link():
             то после указанного времени короткая ссылка автоматически удаляется.
     '''
 
-    return {'message': 'ok'}
+    link_params = link_params.dict()
+    # Проверка, передан ли кастомный алиас для короткой ссылки
+    if not link_params.get('custom_alias'):
+        alias = get_random_link_alias()
+        # ТУТ НУЖНА ПРОВЕРКА НЕТ ЛИ ТАКОГО АЛИАСА В БД
+    else:
+        alias = link_params.get('custom_alias')
+        # ТУТ НУЖНА ПРОВЕРКА НЕТ ЛИ ТАКОГО АЛИАСА В БД
+
+    expires_at = link_params.get('expires_at', 'NULL')
+
+    'Здесь ссылка сохраняется в БД'
+
+    response = {'message': 'Short link created.', 'short_link': f'{HOST_URL_OR_DOMEN}:{HOST_PORT}/links/{alias}'} 
+    return response
 
 
 @links_router.get('/{short_code}')
-async def redirect_on_full_link(short_code: RedirectOnFullLinkRequest):
+async def redirect_on_full_link(short_code: str):
     '''
         Перенаправляет на оригинальный URL, который привязан к короткой ссылке.
     '''
