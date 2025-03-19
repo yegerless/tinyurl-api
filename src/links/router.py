@@ -1,5 +1,8 @@
 from fastapi import APIRouter
 
+from .schemas.requests_schemas import PostShortenLinkRequest, RedirectOnFullLinkRequest, DeleteShortLinkRequest, \
+    UpdateShortLinkRequest, GetShortLinkStatisticsRequest, GetShortLinkByOriginalUrlRequest
+
 links_router = APIRouter(prefix='/links', tags=['links'])
 
 
@@ -16,16 +19,16 @@ async def post_shorten_link():
 
 
 @links_router.get('/{short_code}')
-async def redirect_on_full_link():
+async def redirect_on_full_link(short_code: RedirectOnFullLinkRequest):
     '''
         Перенаправляет на оригинальный URL, который привязан к короткой ссылке.
     '''
 
-    return {'message': 'short_link'}
+    return {'message': f'short_link: {short_code}'}
 
 
 @links_router.delete('/{short_code}')
-async def delete_short_link():
+async def delete_short_link(short_code):
     '''
         Удаляет пару короткая_ссылка-оригинальная_сслыка
     '''
@@ -34,7 +37,7 @@ async def delete_short_link():
 
 
 @links_router.put('/{short_code}')
-async def update_short_link():
+async def update_short_link(short_code):
     '''
         Обновляет коротки адрес (принимает кастомный или генеруриет новый).
     '''
@@ -43,7 +46,7 @@ async def update_short_link():
 
 
 @links_router.get('/{short_code}/stats')
-def get_short_link_statistics():
+def get_short_link_statistics(short_code):
     '''
         Отображает оригинальный URL, возвращает дату создания, количество переходов, дату последнего использования.
     '''
@@ -51,8 +54,8 @@ def get_short_link_statistics():
     return {'message': 'statistics'}
 
 
-@links_router.get('/search?original_url={url}')
-def get_shotr_link_by_original_url():
+@links_router.get('/search')
+def get_short_link_by_original_url(original_url):
     '''
         Возвращает короткую ссылку, привязанную к переданному оригинальному url
     '''
