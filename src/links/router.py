@@ -1,8 +1,13 @@
-from fastapi import APIRouter
+from typing import Annotated
+from fastapi import APIRouter, Query, Path
+from fastapi.responses import RedirectResponse
+from pydantic import AfterValidator
+from validators.url import url as url_validator
+from validators.utils import ValidationError
 
 from config import HOST_URL_OR_DOMEN, HOST_PORT
 from .utils import get_random_link_alias
-from .schemas.requests_schemas import PostShortenLinkRequestBody, ShortCode
+from .schemas.requests_schemas import PostShortenLinkRequestBody
 
 links_router = APIRouter(prefix='/links', tags=['links'])
 
@@ -16,7 +21,14 @@ async def post_shorten_link(link_params: PostShortenLinkRequestBody):
             то после указанного времени короткая ссылка автоматически удаляется.
     '''
 
+    # Распаковка тела запроса
     link_params = link_params.dict()
+    source_link = link_params.get('source_link')
+
+    # Проверка, что передан корректный исходный url
+    if not url_validator(source_link):
+        return {'message': f'Передана некоректная исходная ссылка: {source_link}'}
+    
     # Проверка, передан ли кастомный алиас для короткой ссылки
     if not link_params.get('custom_alias'):
         alias = get_random_link_alias()
@@ -29,21 +41,25 @@ async def post_shorten_link(link_params: PostShortenLinkRequestBody):
 
     'Здесь ссылка сохраняется в БД'
 
-    response = {'message': 'Short link created.', 'short_link': f'{HOST_URL_OR_DOMEN}:{HOST_PORT}/links/{alias}'} 
+    response = {'message': 'Короткая ссылка успешно создана.', 'short_link': f'{HOST_URL_OR_DOMEN}:{HOST_PORT}/links/{alias}'} 
     return response
 
 
 @links_router.get('/{short_code}')
-async def redirect_on_full_link(short_code: str):
+async def redirect_on_full_link(short_code: Annotated[str, Path(description='Алиас короткой ссылки')]):
     '''
         Перенаправляет на оригинальный URL, который привязан к короткой ссылке.
     '''
 
-    return {'message': f'short_link: {short_code}'}
+    # ТУТ НАДО НАПИСАТЬ ЛОГИКУ ДОСТАВАНИЯ ИСХОДНОЙ ССЫЛКИ ИЗ БД
+
+    source_link = 'https://pikabu.ru'
+
+    return RedirectResponse(source_link)
 
 
 @links_router.delete('/{short_code}')
-async def delete_short_link(short_code):
+async def delete_short_link(short_code: Annotated[str, Path(description='Алиас короткой ссылки')]):
     '''
         Удаляет пару короткая_ссылка-оригинальная_сслыка
     '''
@@ -52,16 +68,16 @@ async def delete_short_link(short_code):
 
 
 @links_router.put('/{short_code}')
-async def update_short_link(short_code):
+async def update_short_link(short_code: Annotated[str, Path(description='Алиас короткой ссылки')]):
     '''
-        Обновляет коротки адрес (принимает кастомный или генеруриет новый).
+        Обновляет короткий адрес (принимает кастомный или генеруриет новый).
     '''
 
     return {'message': 'link updated'}
 
 
 @links_router.get('/{short_code}/stats')
-def get_short_link_statistics(short_code):
+def get_short_link_statistics(short_code: Annotated[str, Path(description='Алиас короткой ссылки')]):
     '''
         Отображает оригинальный URL, возвращает дату создания, количество переходов, дату последнего использования.
     '''
@@ -70,9 +86,16 @@ def get_short_link_statistics(short_code):
 
 
 @links_router.get('/search')
-def get_short_link_by_original_url(original_url):
+def get_short_link_by_original_url(
+    original_url: Annotated[str, 
+                            Query(description='Оригинальный url, к которому привязана короткая ссылка'), 
+                            AfterValidator(url_validator)
+                            ]
+    ):
     '''
         Возвращает короткую ссылку, привязанную к переданному оригинальному url
     '''
+    
+    print(url_validator(original_url))
 
     return {'message': 'short_link'}
