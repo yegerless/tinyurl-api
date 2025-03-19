@@ -2,12 +2,12 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Path
 from fastapi.responses import RedirectResponse
 from pydantic import AfterValidator
-from validators.url import url as url_validator
+from validators import url as url_validator
 from validators.utils import ValidationError
 
 from config import HOST_URL_OR_DOMEN, HOST_PORT
 from .utils import get_random_link_alias
-from .schemas.requests_schemas import PostShortenLinkRequestBody
+from .schemas.requests_schemas import PostShortenLinkRequestBody, GetShortLinkByOriginalUrlRequestQuery
 
 links_router = APIRouter(prefix='/links', tags=['links'])
 
@@ -86,16 +86,10 @@ def get_short_link_statistics(short_code: Annotated[str, Path(description='Ал�
 
 
 @links_router.get('/search')
-def get_short_link_by_original_url(
-    original_url: Annotated[str, 
-                            Query(description='Оригинальный url, к которому привязана короткая ссылка'), 
-                            AfterValidator(url_validator)
-                            ]
-    ):
+def get_short_link_by_original_url(query: Annotated[GetShortLinkByOriginalUrlRequestQuery, Query()]):
     '''
         Возвращает короткую ссылку, привязанную к переданному оригинальному url
     '''
-    
-    print(url_validator(original_url))
+    source_link = query.get('source_link')
 
-    return {'message': 'short_link'}
+    return {'message': f'Source link: {source_link}'}

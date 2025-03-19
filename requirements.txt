@@ -39,3 +39,4 @@ watchfiles==1.0.4
 websockets==15.0.1
 SQLAlchemy==2.0.39
 alembic==1.15.1
+validators-0.34.0
