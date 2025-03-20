@@ -6,14 +6,15 @@ services:
       - .env
     ports: 
       - "${HOST_PORT:?err}:8088"
-    volumes:
-      - tinyurl-api-data:/www
+    # volumes:
+      # - tinyurl-api-data:/www
     networks:
       - back-network
     environment:
-     - DEBUG=${DEBUG:?err}
-     - HOST_URL_OR_DOMEN=${HOST_URL_OR_DOMEN:?err}
-     - HOST_PORT=${HOST_PORT:?err}
+      - DEBUG=${DEBUG:?err}
+      - HOST_URL_OR_DOMEN=${HOST_URL_OR_DOMEN:?err}
+      - HOST_PORT=${HOST_PORT:?err}
+    # command: ["python3", "src/main.py"]
     depends_on:
       - db
     restart: on-failure
@@ -24,7 +25,7 @@ services:
     env_file:
       - .env
     ports: 
-      - "${POSTGRES_PORT:?err}:5432"
+      - "${POSTGRES_EXTERNAL_PORT:?err}:${POSTGRES_INTERNAL_PORT:?err}"
     volumes:    
       - db-data:/var/lib/postgresql/data
     networks:
@@ -36,7 +37,7 @@ services:
     restart: on-failure
 
 volumes:
-  tinyurl-api-data:
+  # tinyurl-api-data:
   db-data:
 
 networks:

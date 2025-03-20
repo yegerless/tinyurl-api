@@ -6,6 +6,8 @@ COPY ./requirements.txt /www/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /www/requirements.txt
 
-COPY ./src /www
+COPY . .
 
-CMD ["python3", "main.py"]
+RUN chmod a+x docker/*.sh
+
+CMD ["python3", "src/main.py"]
