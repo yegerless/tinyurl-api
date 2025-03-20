@@ -1,0 +1,43 @@
+services:
+  tinyurl-api:
+    build: .
+    container_name: tinyurl-api-container
+    env_file:
+      - .env
+    ports: 
+      - "8088:8088"
+    volumes:
+      - tinyurl-api-data:/www
+    networks:
+      - back-network
+    environment:
+     - DEBUG=${DEBUG:?err}
+     - HOST_URL_OR_DOMEN=${HOST_URL_OR_DOMEN:?err}
+     - HOST_PORT=${HOST_PORT:?err}
+    depends_on:
+      - db
+    restart: on-failure
+
+  db:
+    image: postgres:17
+    container_name: tinyurl-db-container
+    env_file:
+      - .env
+    ports: 
+      - "5433:5432"
+    volumes:    
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - back-network
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    restart: on-failure
+
+volumes:
+  tinyurl-api-data:
+  db-data:
+
+networks:
+  back-network: {}
