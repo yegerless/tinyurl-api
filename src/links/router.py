@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse
 
 from config import HOST_URL_OR_DOMEN, HOST_PORT
 from .utils import get_random_link_alias, valid_url_regexp
+from models import Link
 from .schemas.requests_schemas import PostShortenLinkRequestBody
 
 links_router = APIRouter(prefix='/links', tags=['links'])

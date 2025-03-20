@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports: 
-      - "8088:8088"
+      - "${HOST_PORT:?err}:8088"
     volumes:
       - tinyurl-api-data:/www
     networks:
@@ -24,7 +24,7 @@ services:
     env_file:
       - .env
     ports: 
-      - "5433:5432"
+      - "${POSTGRES_PORT:?err}:5432"
     volumes:    
       - db-data:/var/lib/postgresql/data
     networks:

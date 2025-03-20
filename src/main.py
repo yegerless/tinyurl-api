@@ -2,7 +2,7 @@ import uvicorn
 
 from fastapi import FastAPI
 
-from config import DEBUG
+from config import DEBUG, HOST_PORT
 from links.router import links_router
 
 app = FastAPI()
@@ -17,4 +17,4 @@ app.include_router(links_router)
 
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", host='0.0.0.0', port=8088, reload=DEBUG)
+    uvicorn.run("main:app", host='0.0.0.0', port=HOST_PORT, reload=DEBUG)

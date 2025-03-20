@@ -1,0 +1,17 @@
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship, declarative_base
+
+Base = declarative_base()
+
+class Link(Base):
+    __tablename__ = 'link'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    # user_id = 
+    alias = Column(String, unique=True, nullable=False)
+    source_url = Column(String, unique=False, nullable=False)
+    created_at = Column(DateTime, unique=False, nullable=False)
+    expires_at = Column(DateTime, unique=False, nullable=True)
+    last_used_at = Column(DateTime, unique=False, nullable=True)
+    transitions_quantity = Column(Integer, default=0, unique=False, nullable=False)
+    
