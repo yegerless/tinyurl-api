@@ -1,8 +1,8 @@
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from config import POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB, POSTGRES_PORT
+from config import POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB, POSTGRES_EXTERNAL_PORT, POSTGRES_INTERNAL_PORT
 
-DB_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@tinyurl-db-container:{POSTGRES_PORT}/{POSTGRES_DB}'
+DB_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@db:{POSTGRES_INTERNAL_PORT}/{POSTGRES_DB}'
 
 engine = create_async_engine(DB_URL)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
