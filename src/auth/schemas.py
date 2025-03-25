@@ -9,7 +9,7 @@ class SignUpUser(BaseModel):
 
 
 
-class User(BaseModel):
+class UserSchema(BaseModel):
     email: str = Field( #pattern='', 
                        description='Электронная почта пользователя')
     created_at: datetime = Field(description='Дата и время регистрации пользователя')
@@ -18,7 +18,7 @@ class User(BaseModel):
 
 
 
-class UserInDB(User):
+class UserInDB(UserSchema):
     hashed_password: str 
 
 

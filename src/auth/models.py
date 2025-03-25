@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.orm import declarative_base
 
 BaseAuth = declarative_base()
 
