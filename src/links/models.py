@@ -1,13 +1,19 @@
+from typing import List
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-Base = declarative_base()
+from base import Base
+
+
 
 class Link(Base):
     __tablename__ = 'link'
     
     id = Column(Integer, primary_key=True, index=True)
-    # user_id = 
+
+    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    user: Mapped["User"] = relationship(back_populates='link')
+
     alias = Column(String, unique=True, nullable=False)
     source_url = Column(String, unique=False, nullable=False)
     created_at = Column(DateTime, unique=False, nullable=False)

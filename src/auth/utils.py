@@ -29,7 +29,7 @@ def verify_password(plain_password, hashed_password) -> bool:
 
 
 
-async def get_user(user_table, session: AsyncSession, username: str) -> UserInDB:
+async def get_user(user_table, session: AsyncSession, username: str) -> UserInDB | bool:
     '''
         Функция get_user - принимает объект таблицы в БД, сесси. подключения 
             к БД и имя пользователя, возвращает валидированный объект с 
@@ -44,6 +44,10 @@ async def get_user(user_table, session: AsyncSession, username: str) -> UserInDB
     query = select(user_table).filter(user_table.email == username)
     result = await session.execute(query)
     result = result.scalars().all()
+
+    # Проверка, что пользователь существует
+    if not result:
+        return False
 
     # Парсинг полученных данных в словарь
     user_dict = {}
@@ -158,7 +162,7 @@ async def get_current_user(user_table, token: str, session: AsyncSession) -> Use
     
     # Получение и проверка объекта с данными пользователя из БД
     user = await get_user(user_table, session=session, username=token_data.username)
-    if user is None:
+    if not user:
         raise credentials_exception
 
     return user
