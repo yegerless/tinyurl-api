@@ -14,11 +14,10 @@ services:
       - DEBUG=${DEBUG:?err}
       - HOST_URL_OR_DOMEN=${HOST_URL_OR_DOMEN:?err}
       - HOST_PORT=${HOST_PORT:?err}
-    # command: ["python3", "src/main.py"]
+    command: ["./docker/run-api.sh"]
     depends_on:
       - db
     restart: on-failure
-
   db:
     image: postgres:17
     container_name: tinyurl-db-container

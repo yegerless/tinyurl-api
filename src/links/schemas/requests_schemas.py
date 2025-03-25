@@ -1,5 +1,5 @@
 from typing import Annotated
-from pydantic import BaseModel, Field, AfterValidator
+from pydantic import BaseModel, Field
 
 from ..utils import valid_url_regexp
 
