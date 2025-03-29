@@ -1,5 +1,11 @@
 import re
 import uuid
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .models import Link
+from .schemas import UrlData
+
 
 def get_random_link_alias(short_code_lenght: int = 6):
     '''
@@ -13,11 +19,26 @@ def get_random_link_alias(short_code_lenght: int = 6):
     return alias
 
 
-# Регулярка для валидации исходных ссылок 
-valid_url_regexp = re.compile(
-        r'^(?:http|ftp)s?://' # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
-        r'localhost|' #localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-        r'(?::\d+)?' # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+async def get_url_data_by_alias(alias: str, session: AsyncSession) -> str | bool:
+    '''
+        Функция get_url_by_alias
+    '''
+
+    query = select(Link).filter(Link.alias == alias)
+    url = await session.execute(query)
+    url = url.scalar()
+    
+    if not url:
+        return False
+    
+    url_dict = {}
+    url_dict['user_id'] = url.user_id
+    url_dict['alias'] = url.alias
+    url_dict['source_url'] = url.source_url
+    url_dict['created_at'] = url.created_at
+    url_dict['expires_at'] = url.expires_at
+    url_dict['last_used_at'] = url.last_used_at
+    url_dict['transitions_quantity'] = url.transitions_quantity
+
+    return UrlData(**url_dict)

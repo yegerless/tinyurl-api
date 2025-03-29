@@ -11,7 +11,7 @@ app = FastAPI()
 
 @app.get('/')
 async def root():
-    return {'message': 'Service is alive!'}
+    return {'message': 'Сервис работает!'}
 
 app.include_router(links_router)
 app.include_router(auth_router)

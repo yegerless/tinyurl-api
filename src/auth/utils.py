@@ -52,6 +52,7 @@ async def get_user(user_table, session: AsyncSession, username: str) -> UserInDB
     # Парсинг полученных данных в словарь
     user_dict = {}
     for user_obj in result:
+        user_dict['id'] = user_obj.id
         user_dict['email'] = user_obj.email
         user_dict['created_at'] = user_obj.created_at
         user_dict['last_login_at'] = user_obj.last_login_at
@@ -137,7 +138,7 @@ def validate_access_token(token: str) -> str:
 
 
 
-async def get_current_user(user_table, token: str, session: AsyncSession) -> UserInDB:
+async def get_current_user(user_table, token: str, session: AsyncSession) -> UserInDB | bool:
     '''
         Функция get_current_user - принимает объект таблицы (sqlalchemy) в БД,
             JWT токен пользователя и объект сессии подключения к БД. 
@@ -149,20 +150,15 @@ async def get_current_user(user_table, token: str, session: AsyncSession) -> Use
             session (AsyncSession) - сессия подключения к БД.
     '''
 
-    # Исключение, которое будет вызвано при провале валидации
-    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                          detail='Не удалось проверить учетные данные',
-                                          headers={"WWW-Authenticate": "Bearer"})
-
     # Получение и проверка username
     username = validate_access_token(token)
     if not username:
-        raise credentials_exception
+        return False
     token_data = TokenData(username=username)
     
     # Получение и проверка объекта с данными пользователя из БД
     user = await get_user(user_table, session=session, username=token_data.username)
     if not user:
-        raise credentials_exception
+        raise False
 
     return user

@@ -1,18 +1,16 @@
 from typing import Annotated
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta, datetime
 from fastapi import Depends, APIRouter, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
-import jwt
-from jwt import InvalidTokenError
 from passlib.hash import bcrypt
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
+from email_validator import validate_email, EmailNotValidError
 
-from .dependencies import coockie_scheme
-from .schemas import Token, TokenData, SignUpUser
+from .dependencies import coockie_scheme, credentials_exception
 from .utils import authenticate_user, create_access_token, get_user, validate_access_token, get_current_user
 from .models import User
-from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
+from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from database import get_async_session
 
 
@@ -29,7 +27,12 @@ async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     '''
 
     # Парсинг и проверка email и пароля
-    email = form_data.username.lower()
+    try:
+        email = validate_email(form_data.username.lower()).normalized
+    except EmailNotValidError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=str(e))
+
     password = form_data.password
     if not password or not email:
         raise HTTPException(
@@ -109,6 +112,8 @@ async def logout(response: Response, session: AsyncSession = Depends(get_async_s
     # Получение данных пользователя по токену, если токен не верный, 
     # то будет вызвано исключение
     user = await get_current_user(User, token, session)
+    if not user:
+        raise credentials_exception
 
     response.delete_cookie(key='tinyurl_access_token')
     return {'message': f'Пользователь {user.email} успешно разлогинился'}
@@ -124,5 +129,7 @@ async def get_current_user_data(token: Annotated[str, Depends(coockie_scheme)],
 
     # Получение данных пользователя
     user = await get_current_user(User, token, session)
+    if not user:
+        raise credentials_exception
 
     return {'username': user.email, 'last_login_at': str(user.last_login_at)}
