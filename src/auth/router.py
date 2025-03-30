@@ -9,10 +9,12 @@ from email_validator import validate_email, EmailNotValidError
 
 from .dependencies import coockie_scheme, credentials_exception
 from .utils import authenticate_user, create_access_token, get_user, validate_access_token, get_current_user
-from .models import User
+from .models import User, create_anonimous_user
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from database import get_async_session
 
+
+create_anonimous_user()
 
 auth_router = APIRouter(prefix='/auth', tags=['auth'])
 
