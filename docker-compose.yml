@@ -17,7 +17,9 @@ services:
     command: ["./docker/run-api.sh"]
     depends_on:
       - db
+      - redis
     restart: on-failure
+
   db:
     image: postgres:17
     container_name: tinyurl-db-container
@@ -31,13 +33,38 @@ services:
       - back-network
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_DB=${POSTGRES_DB:?err}
     restart: on-failure
+
+  redis:
+    image: redis:7
+    container_name: tinyurl-redis-container
+    env_file:
+      - .env
+    command: -- port 5370
+    expose:
+      - 5370
+    volumes:
+      - redis-data:/data
+    networks:
+      - back-network
+    # environment:
+      # - REDIS_PASSWORD=${REDIS_PASSWORD:?err}
+      # - REDIS_USER=${REDIS_USER:?err}
+      # - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+
 
 volumes:
   # tinyurl-api-data:
   db-data:
+  redis-data:
 
 networks:
   back-network: {}
