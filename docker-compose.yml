@@ -73,6 +73,24 @@ services:
       - tinyurl-api
     restart: on-failure
 
+  flower:
+    build: .
+    container_name: tinyurl-flower
+    ports:
+      - "8800:5555"
+    networks:
+      - back-network
+    env_file:
+      - .env
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: ["./docker/run-celery.sh", "flower"]
+    depends_on:
+      - redis
+      - tinyurl-api
+      - celery
+    restart: on-failure
+
 
 
 
