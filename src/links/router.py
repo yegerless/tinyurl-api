@@ -83,7 +83,7 @@ async def post_shorten_link(request: Request, link_params: PostShortenLinkReques
 
 
 @links_router.get('/search')
-@cache(expire=60*10)
+@cache(expire=60)
 async def get_short_link_by_original_url(original_url: Annotated[str, Query(regexp=valid_url_regexp)], 
                                    request: Request, session: AsyncSession = Depends(get_async_session)):
     '''

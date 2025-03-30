@@ -20,7 +20,7 @@ def get_random_link_alias(short_code_lenght: int = 6):
     return alias
 
 
-@cache(expire=60*5)
+@cache(expire=60)
 async def get_url_data_by_alias(alias: str, session: AsyncSession) -> str | bool:
     '''
         Функция get_url_by_alias
