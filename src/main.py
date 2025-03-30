@@ -26,7 +26,6 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.get('/')
-@cache(expire=30)
 async def root():
     sleep(5)
     return {'message': 'Сервис работает!'}
