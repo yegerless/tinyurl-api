@@ -17,7 +17,7 @@ from auth.router import auth_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    redis = aioredis.from_url(f"redis://default:{REDIS_PASSWORD}@redis:5370/0")
+    redis = aioredis.from_url(f"redis://:@redis:5370/0")
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
 
