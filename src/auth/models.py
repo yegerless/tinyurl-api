@@ -4,8 +4,6 @@ from typing import List
 
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, select
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
 
 from base import Base
 from links.models import Link
@@ -24,6 +22,7 @@ class User(Base):
     is_active = Column(Boolean, default=True, unique=False, nullable=False)
 
     link: Mapped[List["Link"]] = relationship(back_populates='user')
+
 
 
 def create_anonimous_user():

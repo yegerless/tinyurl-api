@@ -8,6 +8,7 @@ from .models import Link
 from .schemas import UrlData
 
 
+
 def get_random_link_alias(short_code_lenght: int = 6):
     '''
         Принимает длину алиаса и создает случайный алиас для сокращенной ссылки при помощи функции uuid4.

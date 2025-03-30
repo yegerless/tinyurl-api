@@ -128,11 +128,13 @@ def validate_access_token(token: str) -> str:
             token (str) - JWT токен.
     '''
 
+    # Расшифровка и проверка токена
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except InvalidTokenError:
         return False 
 
+    # Получение username пользователя
     username = payload.get("sub")
 
     return username

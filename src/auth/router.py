@@ -8,13 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from email_validator import validate_email, EmailNotValidError
 
 from .dependencies import coockie_scheme, credentials_exception
-from .utils import authenticate_user, create_access_token, get_user, validate_access_token, get_current_user
+from .utils import authenticate_user, create_access_token, get_user, get_current_user
 from .models import User, create_anonimous_user
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from database import get_async_session
 
 
+# Инициализация анонимного пользователя, если такой еще не создан
 create_anonimous_user()
+
 
 auth_router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -28,13 +30,14 @@ async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
             соответствующим email и захешированным паролем в БД.
     '''
 
-    # Парсинг и проверка email и пароля
+    # Парсинг и проверка email
     try:
         email = validate_email(form_data.username.lower()).normalized
     except EmailNotValidError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=str(e))
 
+    # Парсинг и проверка пароля
     password = form_data.password
     if not password or not email:
         raise HTTPException(
@@ -42,12 +45,13 @@ async def signup(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
             detail="Не передан email или пароль",
         )
 
+    # Проверка, что пользователь с переданным email не существет
     username = await get_user(User, session, email)
     if username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail='Пользователь с переданным email уже существует')
 
-    # Хеширование пароля (для простоты сделал без соли)
+    # Хеширование пароля (без соли)
     hashed_password = bcrypt.hash(password)
 
     # Создание информации о пользователе для заполнения дополнительных полей в БД
@@ -117,7 +121,9 @@ async def logout(response: Response, session: AsyncSession = Depends(get_async_s
     if not user:
         raise credentials_exception
 
+    # Удаление JWT токена из кук
     response.delete_cookie(key='tinyurl_access_token')
+
     return {'message': f'Пользователь {user.email} успешно разлогинился'}
 
 

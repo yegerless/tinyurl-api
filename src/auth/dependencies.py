@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from fastapi.security import APIKeyCookie
 
 
-
+# Аутентификация по JWT токену из кук
 coockie_scheme = APIKeyCookie(name='tinyurl_access_token')
 
 # Исключение, которое будет вызвано при провале валидации
