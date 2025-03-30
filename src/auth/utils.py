@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
 
 from .schemas import UserInDB, TokenData
 from config import SECRET_KEY, ALGORITHM
@@ -137,7 +138,7 @@ def validate_access_token(token: str) -> str:
     return username
 
 
-
+@cache(expire=60*15)
 async def get_current_user(user_table, token: str, session: AsyncSession) -> UserInDB | bool:
     '''
         Функция get_current_user - принимает объект таблицы (sqlalchemy) в БД,

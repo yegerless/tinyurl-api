@@ -5,6 +5,7 @@ from fastapi import APIRouter, Query, Path, Depends, Request, HTTPException, sta
 from fastapi.responses import RedirectResponse
 from sqlalchemy import update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
 
 from config import HOST_URL_OR_DOMEN, HOST_PORT
 from database import get_async_session
@@ -82,6 +83,7 @@ async def post_shorten_link(request: Request, link_params: PostShortenLinkReques
 
 
 @links_router.get('/search')
+@cache(expire=60*10)
 async def get_short_link_by_original_url(original_url: Annotated[str, Query(regexp=valid_url_regexp)], 
                                    request: Request, session: AsyncSession = Depends(get_async_session)):
     '''
