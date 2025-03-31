@@ -1,12 +1,10 @@
-import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from celery import Celery
 from sqlalchemy import select, delete
 
-from config import REDIS_PASSWORD, HOST_PORT
 from database import get_session
-from auth.models import User
+from auth.models import User    # Импорт необходим для правильной инициализации схемы данных sqlalchemy
 from .models import Link
 
 

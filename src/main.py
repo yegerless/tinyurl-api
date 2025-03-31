@@ -27,7 +27,6 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get('/')
 async def root():
-    sleep(5)
     return {'message': 'Сервис работает!'}
 
 app.include_router(links_router)

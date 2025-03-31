@@ -34,7 +34,7 @@ async def post_shorten_link(request: Request, link_params: PostShortenLinkReques
     token = request.cookies.get('tinyurl_access_token')
     user = await get_current_user(User, token, session)
     if user:
-        user_id = user.id
+        user_id = user.get('id')
     else:
         user_id = 1    # Идентификатор для неавторизованного пользователя
 
@@ -100,7 +100,7 @@ async def get_short_link_by_original_url(original_url: Annotated[str, Query(rege
     token = request.cookies.get('tinyurl_access_token')
     user = await get_current_user(User, token, session)
     if user:
-        user_id = user.id
+        user_id = user.get('id')
     else:
         user_id = 1    # Идентификатор для неавторизованного пользователя
 
@@ -136,9 +136,9 @@ async def get_short_link_statistics(short_code: Annotated[str, Path(description=
                             detail='Переданный short_code не найден')
 
     return {'message': f'Найдены следующие статистики по короткой ссылке {HOST_URL_OR_DOMEN}:{HOST_PORT}/links/{short_code}',
-            'original_url': url.source_url, 'created_at': url.created_at,
-            'transitions_quantity': url.transitions_quantity,
-            'last_used_at': url.last_used_at}
+            'original_url': url.get('source_url'), 'created_at': url.get('created_at'),
+            'transitions_quantity': url.get('transitions_quantity'),
+            'last_used_at': url.get('last_used_at')}
 
 
 
@@ -157,7 +157,7 @@ async def get_all_my_links(token: str = Depends(coockie_scheme),
         raise credentials_exception
 
     # Получение данных о коротких ссылках, созданных пользователем
-    query = select(Link).filter(Link.user_id == user.id)
+    query = select(Link).filter(Link.user_id == user.get('id'))
     result = await session.execute(query)
     result = result.scalars().all()
 
@@ -189,13 +189,13 @@ async def redirect_on_full_link(short_code: Annotated[str, Path(description='А�
                             detail='Переданный short_code не найден')
 
     # Увеличение счетчика переходов по короткой ссылке на 1
-    transitions_quantity = url.transitions_quantity + 1
+    transitions_quantity = url.get('transitions_quantity') + 1
     query = update(Link).filter(Link.alias == short_code).values(last_used_at=datetime.now(),
                                                                  transitions_quantity=transitions_quantity)
     await session.execute(query)
     await session.commit()
 
-    return RedirectResponse(url.source_url)
+    return RedirectResponse(url.get('source_url'))
 
 
 
@@ -215,7 +215,7 @@ async def delete_short_link(short_code: Annotated[str, Path(description='Али�
         raise credentials_exception
 
     # Удаление ссылки
-    query = delete(Link).filter(Link.alias == short_code & Link.user_id == user.id)
+    query = delete(Link).filter((Link.alias == short_code) & (Link.user_id == user.get('id')))
     await session.execute(query)
     await session.commit()
 
@@ -240,7 +240,7 @@ async def update_short_link(short_code: Annotated[str, Path(description='Али�
     url = await get_url_data_by_alias(short_code, session)
 
     # Проверка, что ссылка существует и принадлежит текущему пользователю
-    if url.user_id != user.id:
+    if url.get('user_id') != user.get('id'):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Указанный short_code принадлежит \
                                 другому пользователю или не существует')

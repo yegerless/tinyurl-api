@@ -29,9 +29,10 @@ class PostShortenLinkRequestBody(BaseModel):
 class UpdateShortLinkRequest(BaseModel):
     new_alias: str | None = Field(default=None, 
                                      description='Кастомный алиас для короткой ссылки',
-                                     examples=['pika'])
+                                     examples=['pkb'])
     expires_at: str | None = Field(pattern=r'(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})', default=None, 
-                                   description='Дата и время удаления короткой ссылки') 
+                                   description='Дата и время удаления короткой ссылки',
+                                   examples=['10.04.2025 12:30']) 
 
 
 

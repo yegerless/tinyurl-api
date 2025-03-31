@@ -90,11 +90,11 @@ async def login_for_access_token(response: Response,
 
     # Генерация JWT токена, установка времени его протухания
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.email}, 
+    access_token = create_access_token(data={"sub": user.get('email')}, 
                                        expires_delta=access_token_expires)
 
     # Обновление записи в БД о дате и времени последнего залогинивания пользователя
-    query = update(User).filter(User.email == user.email).values(last_login_at=datetime.now())
+    query = update(User).filter(User.email == user.get('email')).values(last_login_at=datetime.now())
     await session.execute(query)
     await session.commit()
 
@@ -102,7 +102,7 @@ async def login_for_access_token(response: Response,
     response.set_cookie(key='tinyurl_access_token', value=access_token, 
                         expires=access_token_expires, httponly=True)
 
-    return {'message': f'Пользователь {user.email} успешно залогинился'}
+    return {'message': f'Пользователь {user.get('email')} успешно залогинился'}
 
 
 
@@ -124,7 +124,7 @@ async def logout(response: Response, session: AsyncSession = Depends(get_async_s
     # Удаление JWT токена из кук
     response.delete_cookie(key='tinyurl_access_token')
 
-    return {'message': f'Пользователь {user.email} успешно разлогинился'}
+    return {'message': f'Пользователь {user.get('email')} успешно разлогинился'}
 
 
 
@@ -140,4 +140,4 @@ async def get_current_user_data(token: Annotated[str, Depends(coockie_scheme)],
     if not user:
         raise credentials_exception
 
-    return {'username': user.email, 'last_login_at': str(user.last_login_at)}
+    return {'username': user.get('email'), 'last_login_at': str(user.get('last_login_at'))}

@@ -30,7 +30,7 @@ def verify_password(plain_password, hashed_password) -> bool:
 
 
 
-async def get_user(user_table, session: AsyncSession, username: str) -> UserInDB | bool:
+async def get_user(user_table, session: AsyncSession, username: str) -> dict | bool:
     '''
         Функция get_user - принимает объект таблицы в БД, сесси. подключения 
             к БД и имя пользователя, возвращает валидированный объект с 
@@ -60,7 +60,7 @@ async def get_user(user_table, session: AsyncSession, username: str) -> UserInDB
         user_dict['is_active'] = user_obj.is_active
         user_dict['hashed_password'] = user_obj.hashed_password
 
-    return UserInDB(**user_dict)
+    return user_dict
 
 
 
@@ -85,7 +85,7 @@ async def authenticate_user(user_table, username: str, password: str,
         return False
 
     # Проверка совпадения пароля и хэша пароля
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.get('hashed_password')):
         return False
 
     return user
@@ -141,7 +141,7 @@ def validate_access_token(token: str) -> str:
 
 
 @cache(expire=60*15)
-async def get_current_user(user_table, token: str, session: AsyncSession) -> UserInDB | bool:
+async def get_current_user(user_table, token: str, session: AsyncSession) -> dict | bool:
     '''
         Функция get_current_user - принимает объект таблицы (sqlalchemy) в БД,
             JWT токен пользователя и объект сессии подключения к БД. 

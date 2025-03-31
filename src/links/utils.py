@@ -43,4 +43,4 @@ async def get_url_data_by_alias(alias: str, session: AsyncSession) -> str | bool
     url_dict['last_used_at'] = url.last_used_at
     url_dict['transitions_quantity'] = url.transitions_quantity
 
-    return UrlData(**url_dict)
+    return url_dict
